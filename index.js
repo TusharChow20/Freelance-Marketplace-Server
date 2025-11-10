@@ -65,6 +65,13 @@ async function run() {
       res.send(result);
     });
 
+    app.delete("/jobs/:id", async (req, res) => {
+      const userId = req.params.id;
+      const query = { _id: new ObjectId(userId) };
+      const result = await jobCollection.deleteOne(query);
+      res.send(result);
+    });
+
     app.get("/acceptedJob", async (req, res) => {
       // console.log(req);
 
