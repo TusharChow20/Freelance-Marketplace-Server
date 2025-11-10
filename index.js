@@ -52,15 +52,24 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/acceptedJob", async (req, res) => {
+      // console.log(req);
 
-    // app.get("/acceptedJob",async(req,res)=>{
-    //     const email = req.query.email;
-    //     const 
-    // })
+      const email = req.query.email;
+      //   console.log(email);
+      const query = { email };
+      const result = await acceptedJobCollection.find(query).toArray();
+      res.send(result);
+    });
     app.post("/acceptedJob", async (req, res) => {
       const newAccept = req.body;
       const result = await acceptedJobCollection.insertOne(newAccept);
       res.send(result);
+    });
+    app.delete("/acceptedJob/:id", async (req, res) => {
+      const userId = req.params.id;
+      const query = { _id: new ObjectId(userId) };
+      const result = await acceptedJobCollection.deleteOne(query);
     });
 
     ///################################-------------------------
