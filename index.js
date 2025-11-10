@@ -28,6 +28,7 @@ async function run() {
     await client.connect();
     const userDB = client.db("usersJobsDb");
     const jobCollection = userDB.collection("jobs");
+    const acceptedJobCollection = userDB.collection("acceptedJob");
 
     //-----------------########################################
     app.get("/jobs", async (req, res) => {
@@ -48,6 +49,17 @@ async function run() {
       //   console.log(query);
 
       const result = await jobCollection.findOne(query);
+      res.send(result);
+    });
+
+
+    // app.get("/acceptedJob",async(req,res)=>{
+    //     const email = req.query.email;
+    //     const 
+    // })
+    app.post("/acceptedJob", async (req, res) => {
+      const newAccept = req.body;
+      const result = await acceptedJobCollection.insertOne(newAccept);
       res.send(result);
     });
 
