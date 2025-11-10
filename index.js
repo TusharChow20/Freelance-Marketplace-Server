@@ -52,6 +52,19 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/jobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedData = req.body;
+      //   console.log(updatedData);
+      const updateDoc = {
+        $set: updatedData,
+      };
+
+      const query = { _id: new ObjectId(id) };
+      const result = await jobCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
     app.get("/acceptedJob", async (req, res) => {
       // console.log(req);
 
@@ -70,6 +83,7 @@ async function run() {
       const userId = req.params.id;
       const query = { _id: new ObjectId(userId) };
       const result = await acceptedJobCollection.deleteOne(query);
+      res.send(result);
     });
 
     ///################################-------------------------
