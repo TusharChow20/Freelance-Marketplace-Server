@@ -32,7 +32,10 @@ async function run() {
 
     //-----------------########################################
     app.get("/jobs", async (req, res) => {
-      const jobs = await jobCollection.find().toArray();
+      const jobs = await jobCollection
+        .find()
+        .sort({ postedDate: -1 })
+        .toArray();
       res.send(jobs);
     });
 
