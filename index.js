@@ -5,11 +5,42 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 3000;
 
+const admin = require("firebase-admin");
+
+const serviceAccount = require("./firebaseAdminSDK.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
 app.use(cors());
 app.use(express.json());
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
+
+const verifyFirebaseToken = async (req, res, next) => {
+  console.log(req.headers);
+
+  if (req.headers.authorization) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+
+  ///////////////verify token /////////////////////////////////////
+
+  try {
+    const userInfo = await admin.auth().verifyIdToken(token);
+    console.log("token validation", userInfo);
+
+    next();
+  } catch {
+    return res.status(401).send({ message: "unauthorized access" });
+  }
+};
 
 const uri = process.env.MONGO_URI;
 
@@ -46,7 +77,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/jobs/:id", async (req, res) => {
+    app.get("/jobs/:id", verifyFirebaseToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       //   console.log(query);
@@ -75,7 +106,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/acceptedJob", async (req, res) => {
+    app.get("/acceptedJob", verifyFirebaseToken, async (req, res) => {
       // console.log(req);
 
       const email = req.query.email;
