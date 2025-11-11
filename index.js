@@ -20,25 +20,25 @@ app.get("/", (req, res) => {
 });
 
 const verifyFirebaseToken = async (req, res, next) => {
-  console.log(req.headers);
+  const authHeader = req.headers.authorization;
 
-  if (req.headers.authorization) {
-    return res.status(401).send({ message: "unauthorized access" });
-  }
-  const token = req.headers.authorization.split(" ")[1];
-  if (!token) {
-    return res.status(401).send({ message: "unauthorized access" });
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    // console.log(" No or invalid Authorization header:", authHeader);
+    return res.status(401).send({ message: "unauthorized access - no token" });
   }
 
-  ///////////////verify token /////////////////////////////////////
+  const token = authHeader.split(" ")[1];
 
   try {
     const userInfo = await admin.auth().verifyIdToken(token);
-    console.log("token validation", userInfo);
-
+    // console.log("Token verified for:", userInfo.email);
+    req.user = userInfo;
     next();
-  } catch {
-    return res.status(401).send({ message: "unauthorized access" });
+  } catch (error) {
+    // console.error("Token verification failed:", error.message);
+    return res
+      .status(401)
+      .send({ message: "unauthorized access - invalid token" });
   }
 };
 
@@ -77,7 +77,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/jobs/:id", verifyFirebaseToken, async (req, res) => {
+    app.get("/jobs/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       //   console.log(query);
